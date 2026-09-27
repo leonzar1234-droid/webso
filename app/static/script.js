@@ -250,6 +250,113 @@
   var emailSendBtn = document.getElementById('email-send-btn');
   var emailResult = document.getElementById('email-result');
 
+  // ---------- Historial de mensajes ----------
+  var messagesList = document.getElementById('messages-list');
+  var messagesEmpty = document.getElementById('messages-empty');
+  var refreshMessagesBtn = document.getElementById('refresh-messages');
+  var clearMessagesBtn = document.getElementById('clear-messages');
+  var messagesContainer = document.getElementById('messages-container');
+
+  function renderMessages(messages) {
+    messagesList.innerHTML = '';
+
+    if (!messages || messages.length === 0) {
+      messagesList.style.display = 'none';
+      messagesEmpty.style.display = '';
+      return;
+    }
+
+    messagesList.style.display = 'flex';
+    messagesEmpty.style.display = 'none';
+
+    // Mostrar los últimos 20 mensajes, ordenados del más reciente al más viejo
+    var recentMessages = messages.slice(-20).reverse();
+
+    recentMessages.forEach(function (msg) {
+      var item = document.createElement('div');
+      item.className = 'message-item' + (msg.success ? ' success' : ' error');
+
+      var header = document.createElement('div');
+      header.className = 'message-header';
+
+      var toSpan = document.createElement('span');
+      toSpan.className = 'message-to';
+      toSpan.textContent = 'Para: ' + escapeHtml(msg.to);
+
+      var statusSpan = document.createElement('span');
+      statusSpan.className = 'message-status ' + (msg.success ? 'sent' : 'failed');
+      statusSpan.textContent = msg.success ? '✓ Enviado' : '✗ Fallido';
+
+      header.appendChild(toSpan);
+      header.appendChild(statusSpan);
+
+      var subjectDiv = document.createElement('div');
+      subjectDiv.className = 'message-subject';
+      subjectDiv.textContent = escapeHtml(msg.subject);
+
+      var bodyDiv = document.createElement('div');
+      bodyDiv.className = 'message-body';
+      bodyDiv.textContent = escapeHtml(msg.message);
+
+      var metaDiv = document.createElement('div');
+      metaDiv.className = 'message-meta';
+
+      var dateSpan = document.createElement('span');
+      var date = new Date(msg.timestamp);
+      dateSpan.textContent = date.toLocaleString();
+
+      metaDiv.appendChild(dateSpan);
+
+      item.appendChild(header);
+      item.appendChild(subjectDiv);
+      item.appendChild(bodyDiv);
+      item.appendChild(metaDiv);
+
+      messagesList.appendChild(item);
+    });
+  }
+
+  function refreshMessages() {
+    fetch('/messages', { headers: { Accept: 'application/json' } })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.json();
+      })
+      .then(function (data) {
+        renderMessages(data.messages || []);
+        statusMsg.textContent = 'Historial actualizado: ' +
+          (data.messages ? data.messages.length : 0) + ' mensaje(s).';
+      })
+      .catch(function (err) {
+        statusMsg.textContent = 'No se pudo obtener el historial.';
+        console.error('Error refreshMessages:', err);
+      });
+  }
+
+  refreshMessagesBtn.addEventListener('click', refreshMessages);
+
+  clearMessagesBtn.addEventListener('click', function () {
+    if (confirm('¿Estás seguro de que quieres limpiar todo el historial de mensajes?')) {
+      fetch('/messages/clear', { method: 'GET' })
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.json();
+        })
+        .then(function (data) {
+          messagesList.innerHTML = '';
+          messagesList.style.display = 'none';
+          messagesEmpty.style.display = '';
+          statusMsg.textContent = 'Historial limpiado (' + data.cleared + ' mensaje(s) eliminados).';
+        })
+        .catch(function (err) {
+          statusMsg.textContent = 'No se pudo limpiar el historial.';
+          console.error('Error clearMessages:', err);
+        });
+    }
+  });
+
+  // ---------- Envío de correo (Fase 3) ----------
+
   function showEmailResult(data) {
     emailResult.className = 'result-box';
     if (data && data.ok) {
