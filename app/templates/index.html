@@ -39,10 +39,25 @@
             <button type="submit" id="upload-btn" class="btn-primary">Subir</button>
           </div>
         </form>
-        <div id="upload-result" class="result-box" role="status" aria-live="polite"></div>
+        <div id="email-result" class="result-box" role="status" aria-live="polite"></div>
       </section>
 
-      <section class="files-card">
+      <!-- Historial de mensajes enviados -->
+      <section class="messages-section">
+        <h2>📬 Mensajes enviados</h2>
+        <div class="messages-actions">
+          <button id="refresh-messages" class="btn">Actualizar</button>
+          <button id="clear-messages" class="btn btn-secondary">Limpiar historial</button>
+        </div>
+        <div id="messages-container" class="messages-container">
+          <div id="messages-empty" class="messages-empty" style="display: none;">
+            <p>No hay mensajes enviados todavía.</p>
+          </div>
+          <div id="messages-list" class="messages-list" style="display: none;"></div>
+        </div>
+      </section>
+
+      <section class="info-card">
         <h2>ARCHIVOS DISPONIBLES</h2>
         <div id="files-empty" class="files-empty">
           <p>No hay archivos almacenados.</p>
@@ -95,6 +110,19 @@
           </div>
         </form>
         <div id="email-result" class="result-box" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- Historial de mensajes enviados -->
+      <section class="messages-card card">
+        <h2>📬 Mensajes enviados</h2>
+        <div class="messages-actions">
+          <button id="refresh-messages" class="btn-secondary">Actualizar</button>
+          <button id="clear-messages" class="btn-secondary">Limpiar historial</button>
+        </div>
+        <div id="messages-empty" class="messages-empty" style="display: none;">
+          <p>No hay mensajes enviados todavía.</p>
+        </div>
+        <div id="messages-list" class="messages-list" style="display: none;"></div>
       </section>
 
       <section class="info-card">

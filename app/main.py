@@ -15,6 +15,8 @@ from jinja2 import Environment, FileSystemLoader
 from contextlib import asynccontextmanager as _ac
 
 from app.schemas import EmailSendRequest
+from app.messages import guardar_mensaje, obtener_mensajes
+from app.messages import guardar_mensaje, obtener_mensajes
 
 # Cargar variables de entorno desde .env si existe
 from dotenv import load_dotenv, find_dotenv
@@ -295,6 +297,13 @@ async def send_email(payload: EmailSendRequest):
             )
 
             if response.status_code == 202:
+                # Guardar en historial
+                guardar_mensaje(
+                    to=payload.to,
+                    subject=payload.subject,
+                    message=payload.message,
+                    success=True,
+                )
                 return JSONResponse(
                     status_code=200,
                     content={
@@ -344,3 +353,16 @@ async def send_email(payload: EmailSendRequest):
                 "message": "Error interno al enviar el correo.",
             },
         )
+
+
+@app.get("/messages")
+async def get_messages():
+    """Devuelve el historial de mensajes enviados."""
+    return {"messages": obtener_mensajes()}
+
+
+@app.get("/messages/clear")
+async def clear_messages():
+    """Limpia el historial de mensajes."""
+    count = limpiar_historial()
+    return {"ok": True, "cleared": count}
