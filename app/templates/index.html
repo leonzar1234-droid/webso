@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMIP — Fase 3</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SMIP</h1>
+      <p class="subtitle">Aplicación web académica — Fase 3</p>
+    </header>
+
+    <main>
+      <section class="status-card">
+        <h2>Estado del servicio</h2>
+        <div id="status-badge" class="badge">
+          <span class="spinner"></span>
+          Conectando...
+        </div>
+        <p id="status-message" class="status-message"></p>
+      </section>
+
+      <section class="upload-card">
+        <h2>SUBIR ARCHIVO</h2>
+        <p class="upload-hint">Selecciona un archivo (máx. 10 MB) y presiona Subir.</p>
+        <form id="upload-form" class="upload-form">
+          <div class="upload-row">
+            <input
+              type="file"
+              id="file-input"
+              name="file"
+              class="file-input"
+              required
+              aria-label="Seleccionar archivo"
+            >
+            <button type="submit" id="upload-btn" class="btn-primary">Subir</button>
+          </div>
+        </form>
+        <div id="upload-result" class="result-box" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="files-card">
+        <h2>ARCHIVOS DISPONIBLES</h2>
+        <div id="files-empty" class="files-empty">
+          <p>No hay archivos almacenados.</p>
+        </div>
+        <ul id="files-list" class="files-list" hidden></ul>
+        <div class="files-actions">
+          <button id="refresh-btn" type="button" class="btn-secondary">Actualizar lista</button>
+        </div>
+      </section>
+
+      <section class="email-card">
+        <h2>ENVIAR CORREO</h2>
+        <p class="email-hint">Completa los campos y presiona Enviar. Se utiliza la configuración SMTP definida en las variables de entorno.</p>
+        <form id="email-form" class="email-form">
+          <div class="email-field">
+            <label for="email-to">Destinatario</label>
+            <input
+              type="email"
+              id="email-to"
+              name="to"
+              class="email-input"
+              placeholder="destinatario@example.com"
+              required
+            >
+          </div>
+          <div class="email-field">
+            <label for="email-subject">Asunto</label>
+            <input
+              type="text"
+              id="email-subject"
+              name="subject"
+              class="email-input"
+              placeholder="Asunto del correo"
+              required
+            >
+          </div>
+          <div class="email-field">
+            <label for="email-message">Mensaje</label>
+            <textarea
+              id="email-message"
+              name="message"
+              class="email-textarea"
+              placeholder="Cuerpo del mensaje..."
+              rows="5"
+              required
+            ></textarea>
+          </div>
+          <div class="email-actions">
+            <button type="submit" id="email-send-btn" class="btn-primary">Enviar correo</button>
+          </div>
+        </form>
+        <div id="email-result" class="result-box" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="info-card">
+        <h2>¿Qué es SMIP?</h2>
+        <p>
+          SMIP es una aplicación web académica desarrollada con
+          <strong>Python 3.12</strong>, <strong>FastAPI</strong> y
+          <strong>Uvicorn</strong>.
+        </p>
+        <p>Funcionalidades disponibles en esta fase:</p>
+        <ul>
+          <li>📤 Carga de archivos (upload) — <code>POST /upload</code></li>
+          <li>📥 Descarga de archivos (download) — <code>GET /download/{nombre}</code></li>
+          <li>📋 Listado de archivos — <code>GET /files</code></li>
+          <li>✉️ Envío de correos (SMTP) — <code>POST /send-email</code></li>
+        </ul>
+        <p class="phase-note">
+          Actualmente en <strong>Fase 3</strong> — subida, descarga, listado
+          y envío de correos implementados. Para usar el envío de correos,
+          configura las variables SMTP_HOST, SMTP_PORT, SMTP_USER,
+          SMTP_PASSWORD y SMTP_FROM (ver .env.example).
+        </p>
+      </section>
+
+      <section class="health-card">
+        <h2>Verificación</h2>
+        <button id="health-btn" type="button" class="btn-secondary">
+          Consultar estado del servicio
+        </button>
+        <pre id="health-result" class="health-result"></pre>
+      </section>
+    </main>
+
+    <footer>
+      <p>SMIP · Desarrollo académico · Fase 3</p>
+    </footer>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

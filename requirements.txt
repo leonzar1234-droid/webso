@@ -1,0 +1,5 @@
+# SMIP - Academic Web Application
+# Upload | Download | Email — for academic purposes
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+jinja2>=3.1.0

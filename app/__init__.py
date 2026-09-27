@@ -1,0 +1,1 @@
+# SMIP - Paquete de aplicación
