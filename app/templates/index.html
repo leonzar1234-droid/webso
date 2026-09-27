@@ -9,8 +9,26 @@
 <body>
   <div class="container">
     <header>
-      <h1>SMIP</h1>
-      <p class="subtitle">Aplicación web académica — Fase 3</p>
+      <div class="logo-section">
+        <div class="logo">SMIP</div>
+        <h1>SMIP</h1>
+        <p class="subtitle">Sistema de Manejo de Información y Proyectos — Fase 3</p>
+      </div>
+
+      <div class="project-members">
+        <div class="member">
+          <span class="nombre">Tulio</span>
+          <span class="apellido">Acosta Puyo</span>
+        </div>
+        <div class="member">
+          <span class="nombre">Renato</span>
+          <span class="apellido">Moreno Rengifo</span>
+        </div>
+        <div class="member">
+          <span class="nombre">Luis</span>
+          <span class="apellido">Flores Arbildo</span>
+        </div>
+      </div>
     </header>
 
     <main>
@@ -112,19 +130,6 @@
         <div id="email-result" class="result-box" role="status" aria-live="polite"></div>
       </section>
 
-      <!-- Historial de mensajes enviados -->
-      <section class="messages-card card">
-        <h2>📬 Mensajes enviados</h2>
-        <div class="messages-actions">
-          <button id="refresh-messages" class="btn-secondary">Actualizar</button>
-          <button id="clear-messages" class="btn-secondary">Limpiar historial</button>
-        </div>
-        <div id="messages-empty" class="messages-empty" style="display: none;">
-          <p>No hay mensajes enviados todavía.</p>
-        </div>
-        <div id="messages-list" class="messages-list" style="display: none;"></div>
-      </section>
-
       <section class="info-card">
         <h2>¿Qué es SMIP?</h2>
         <p>
@@ -134,22 +139,21 @@
         </p>
         <p>Funcionalidades disponibles en esta fase:</p>
         <ul>
-          <li>📤 Carga de archivos (upload) — <code>POST /upload</code></li>
-          <li>📥 Descarga de archivos (download) — <code>GET /download/{nombre}</code></li>
+          <li>📤 Carga de archivos — <code>POST /upload</code></li>
+          <li>📥 Descarga de archivos — <code>GET /download/{nombre}</code></li>
           <li>📋 Listado de archivos — <code>GET /files</code></li>
-          <li>✉️ Envío de correos (SMTP) — <code>POST /send-email</code></li>
+          <li>✉️ Envío de correos (SendGrid) — <code>POST /send-email</code></li>
+          <li>💾 Persistencia de archivos (Supabase Storage)</li>
         </ul>
         <p class="phase-note">
-          Actualmente en <strong>Fase 3</strong> — subida, descarga, listado
-          y envío de correos implementados. Para usar el envío de correos,
-          configura las variables SMTP_HOST, SMTP_PORT, SMTP_USER,
-          SMTP_PASSWORD y SMTP_FROM (ver .env.example).
+          Actualmente en <strong>Fase 3</strong> — subida, descarga, listado,
+          envío de correos con SendGrid API y persistencia de archivos con Supabase Storage.
         </p>
       </section>
 
       <section class="health-card">
         <h2>Verificación</h2>
-        <button id="health-btn" type="button" class="btn-secondary">
+        <button id="health-btn" type="button" class="btn btn-secondary">
           Consultar estado del servicio
         </button>
         <pre id="health-result" class="health-result"></pre>
@@ -157,7 +161,8 @@
     </main>
 
     <footer>
-      <p>SMIP · Desarrollo académico · Fase 3</p>
+      <p>SMIP · Proyecto grupal · Fase 3</p>
+      <p>Tulio Acosta Puyo · Renato Moreno Rengifo · Luis Flores Arbildo</p>
     </footer>
   </div>
 
