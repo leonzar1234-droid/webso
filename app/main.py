@@ -9,14 +9,18 @@ from contextlib import asynccontextmanager
 
 import httpx
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader
 from contextlib import asynccontextmanager as _ac
 
 from app.schemas import EmailSendRequest
 from app.messages import guardar_mensaje, obtener_mensajes
-from app.messages import guardar_mensaje, obtener_mensajes
+from app.supabase_storage import (
+    upload_file as s3_upload_file,
+    list_files as s3_list_files,
+    download_file as s3_download_file,
+)
 
 # Cargar variables de entorno desde .env si existe
 from dotenv import load_dotenv, find_dotenv
@@ -165,9 +169,9 @@ async def health():
     return {"status": "ok", "service": "SMIP", "phase": 3}
 
 
-@app.post("/upload")
+@ app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    """Recibe un archivo multipart y lo guarda en uploads/."""
+    """Recibe un archivo multipart y lo guarda en Supabase Storage."""
     if not file.filename:
         return JSONResponse(
             status_code=400,
@@ -175,6 +179,12 @@ async def upload_file(file: UploadFile = File(...)):
         )
 
     filename = _safe_filename(file.filename)
+    if not filename:
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "error": "Nombre de archivo no válido."},
+        )
+
     dest = _safe_path(filename)
 
     # Leer contenido y validar tamaño antes de escribir
@@ -188,55 +198,63 @@ async def upload_file(file: UploadFile = File(...)):
             },
         )
 
-    # Sobrescribe si ya existe (comportamiento definido para esta fase)
-    dest.write_bytes(content)
-
-    return JSONResponse(
-        status_code=200,
-        content={
-            "ok": True,
-            "name": filename,
-            "size": len(content),
-            "path": str(dest),
-        },
-    )
-
-
-@app.get("/files")
-async def list_files():
-    """Devuelve el listado de archivos almacenados en uploads/."""
-    entries = []
+    # Subir a Supabase Storage en lugar de guardar localmente
     try:
-        for entry in UPLOAD_DIR.iterdir():
-            if entry.is_file():
-                entries.append({
-                    "name": entry.name,
-                    "size": entry.stat().st_size,
-                })
-    except OSError:
-        pass
+        result = s3_upload_file(content, filename)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "ok": True,
+                "name": result["filename"],
+                "size": result["size"],
+                "download_url": result["download_url"],
+                "path": str(dest),
+            },
+        )
+    except Exception as e:
+        logger.exception("Error al subir archivo a Supabase Storage.")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "ok": False,
+                "message": "Error al subir archivo a Supabase Storage.",
+            },
+        )
 
-    entries.sort(key=lambda e: e["name"].lower())
-    return {"files": entries}
+
+@ app.get("/files")
+async def list_files():
+    """Devuelve el listado de archivos almacenados en Supabase Storage."""
+    try:
+        files = s3_list_files()
+        return {"files": files}
+    except Exception as e:
+        logger.exception("Error al listar archivos de Supabase Storage.")
+        return {"files": []}
 
 
-@app.get("/download/{filename}")
+@ app.get("/download/{filename}")
 async def download_file(filename: str):
-    """Descarga un archivo existente desde uploads/."""
+    """Descarga un archivo desde Supabase Storage."""
     safe_name = _safe_filename(filename)
-    dest = _safe_path(safe_name)
+    if not safe_name:
+        raise HTTPException(status_code=400, detail="Nombre de archivo no válido.")
 
-    if not dest.is_file():
+    # Intentar descargar de Supabase Storage
+    try:
+        content = s3_download_file(safe_name)
+        return Response(
+            content=content,
+            media_type="application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}"',
+            },
+        )
+    except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Archivo no encontrado.")
-
-    return FileResponse(
-        path=dest,
-        filename=safe_name,
-        media_type="application/octet-stream",
-        headers={
-            "Content-Disposition": f'attachment; filename="{safe_name}"',
-        },
-    )
+    except Exception as e:
+        logger.exception(f"Error al descargar archivo '{safe_name}' de Supabase Storage.")
+        raise HTTPException(status_code=500, detail="Error al descargar el archivo.")
 
 
 @_ac

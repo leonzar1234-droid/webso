@@ -204,21 +204,21 @@
 
       var sizeSpan = document.createElement('span');
       sizeSpan.className = 'file-size';
-      sizeSpan.textContent = formatSize(entry.size);
+      sizeSpan.textContent = formatSize(entry.size || 0);
 
       info.appendChild(nameSpan);
       info.appendChild(sizeSpan);
 
-      var dlBtn = document.createElement('button');
-      dlBtn.type = 'button';
-      dlBtn.className = 'btn-secondary btn-small';
-      dlBtn.textContent = 'Descargar';
-      dlBtn.addEventListener('click', function () {
-        downloadFile(entry.name);
-      });
+      // Descargar desde Supabase Storage usando la URL pública
+      var downloadLink = document.createElement('a');
+      downloadLink.href = entry.download_url || '/download/' + encodeURIComponent(entry.name);
+      downloadLink.className = 'btn-secondary';
+      downloadLink.textContent = 'Descargar';
+      downloadLink.target = '_blank';
+      downloadLink.rel = 'noopener noreferrer';
 
       li.appendChild(info);
-      li.appendChild(dlBtn);
+      li.appendChild(downloadLink);
       filesList.appendChild(li);
     });
   }
