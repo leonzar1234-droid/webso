@@ -11,6 +11,7 @@ import httpx
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from jinja2 import Environment, FileSystemLoader
 from contextlib import asynccontextmanager as _ac
 
@@ -33,6 +34,15 @@ app = FastAPI(
     title="SMIP",
     description="Aplicación web académica - Fase 3",
     version="0.3.0",
+)
+
+# Configurar CORS para permitir peticiones del navegador
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Monta carpeta static para CSS y JS
